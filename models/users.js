@@ -32,7 +32,7 @@ module.exports = {
             //console.log(docs);
             if (docs.length > 0) {
                 console.log("Found USer");
-                resolve(docs.pub);
+                resolve(docs[0].pub);
             } else { 
                 console.log("user search rejected");
                 reject(docs);

@@ -64,9 +64,9 @@ function createEntries(data) {
     for (var entry in data.businesses) {
         var pubID = data.businesses[entry]["name"].match(/\w|\-|\_|\:|\./g).join("");
         $("#main-container").append(
-            "<div class='row'><div id='image-container' class='col-sm-6'><img class='pull-right' src='" + data.businesses[entry]["image_url"] + "' alt='No image available'></div><div class='col-sm-3'><h5 class='pull-left'>" + data.businesses[entry]["name"] + "</h5></div><div class='col-sm-3'><button id='" + pubID + "' class='btn btn-primary'>attend</button></div>"
+            "<div class='row'><div id='image-container' class='col-sm-6'><img class='pull-right' src='" + data.businesses[entry]["image_url"] + "' alt='No image available'></div><div class='col-sm-3'><h5 class='pull-left'>" + data.businesses[entry]["name"] + "</h5></div></div>"
             );
-        if (data.businesses[entry].attending) {
+        /*if (data.businesses[entry].attending) {
             $("#" + pubID).removeClass("btn-primary");
             $("#" + pubID).addClass("btn-danger");
             $("#" + pubID).text("Not going");
@@ -74,7 +74,8 @@ function createEntries(data) {
     }
     $(".btn").click(function() {
             addAttendance(this.id);
-    });
+    });*/
+    }
 }
 
 function addAttendance(pubName) {
@@ -93,7 +94,7 @@ function addAttendance(pubName) {
         }
     });
 }
-
+/*
 function changeButton(id, added) {
     if (added) {
         $("#" + id).removeClass("btn-primary");
@@ -104,4 +105,4 @@ function changeButton(id, added) {
         $("#" + id).addClass("btn-primary");
         $("#" + id).text("Attend");
     }
-}
+}*/

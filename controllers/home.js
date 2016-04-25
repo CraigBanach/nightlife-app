@@ -21,22 +21,29 @@ router.post("/search", jsonParser,   function (req, res) {
     var searchPromise = new Promise(function (resolve, reject) {
         yelpSearch(resolve, req.body.latitude, req.body.longitude);
     });
-    var userDataPromise = new Promise(function (resolve, reject) {
+    if(req.session.hasOwnProperty(passport)) {
+        var userDataPromise = new Promise(function (resolve, reject) {
         userDB.searchForUser2(resolve, reject, req.session.passport.user.id);
     });
+    } else {
+        var userDataPromise = new Promise(function (resolve, reject) {resolve([])});
+    }
+    
     
     Promise.all([searchPromise, userDataPromise]).then(function(values) {
-       /* for (var business in values[0].businesses) {
-            if (values[1].indexOf(values[0].businesses[business].name) >= 0) {
+        for (var business in values[0].businesses) {
+            //console.log(values);
+            if (values[1].indexOf(values[0].businesses[business]["name"]) >= 0) {
+                
                 values[0].businesses[business]["attending"] = true;
             } else {
                 values[0].businesses[business]["attending"] = false;
             }
-        }*/
+        }
         
         res.setHeader('Content-Type', 'application/json');
         res.status(200);
-        console.log(values[0]);
+        //console.log(values[0]);
         res.send(values[0]);
         res.end();
     });
