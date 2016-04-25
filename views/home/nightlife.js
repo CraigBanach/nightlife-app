@@ -36,7 +36,10 @@ $(document).ready(function() {
                 accepts: "application/json",
                 dataType: "json",
                 error: function() {alert("error");},
-                success: function (data) {createEntries(data)}
+                success: function (data) {
+                    createEntries(data);
+                    $(".spinner").hide();
+                }
             });
         });
     } else {
@@ -59,6 +62,40 @@ $(document).ready(function() {
 
 function createEntries(data) {
     for (var entry in data.businesses) {
-        $("#main-container").append(entry);
+        $("#main-container").append(
+            "<div class='row'><div id='image-container' class='col-sm-6'><img class='pull-right' src='" + data.businesses[entry]["image_url"] + "' alt='No image available'></div><div class='col-sm-3'><h5 class='pull-left'>" + data.businesses[entry]["name"] + "</h5></div><div class='col-sm-3'><button id='" + data.businesses[entry]["name"].match(/\w|\-|\_|\:|\./g).join("") + "' class='btn btn-primary'>attend</button></div>"
+            );
+        }
+    $(".btn").click(function() {
+            addAttendance(this.id);
+    });
+}
+
+function addAttendance(pubName) {
+    var url = "https://nightlife-cragsify.c9users.io/home/attendance";
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: JSON.stringify({pubName: pubName}),
+        accepts: "application/json",
+        contentType: "application/json",
+        dataType: "json",
+        error: function() {alert("error");},
+        success: function (data) {
+            alert(data.added);
+            changeButton(pubName, data.added);
+        }
+    });
+}
+
+function changeButton(id, added) {
+    if (added) {
+        $("#" + id).removeClass("btn-primary");
+        $("#" + id).addClass("btn-danger");
+        $("#" + id).text("Not going");
+    } else {
+        $("#" + id).removeClass("btn-danger");
+        $("#" + id).addClass("btn-primary");
+        $("#" + id).text("Attend");
     }
 }

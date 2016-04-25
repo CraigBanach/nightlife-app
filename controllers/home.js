@@ -8,28 +8,50 @@ var bodyParser = require("body-parser");
 var Yelp = require("yelp");
 
 var jsonParser = bodyParser.json({type:"application/json"});
-//var passport = require('passport');
+var passport = require('passport');
 //var session = require('express-session');
-//var userDB = require("../models/users");
-
-require("../middlewares/Authentication/Passport-github2");
+var userDB = require("../models/users");
 
 router.get("/", function (req, res) {
     res.redirect("/home/nightlife.html");
 });
 
 router.post("/search", jsonParser,   function (req, res) {
-    //console.log("latitude: " + req.body.latitude + "\nlongitude: " + req.body.longitude);
-    yelpSearch(req.body.latitude, req.body.longitude).then(function (data) {
+
+    var searchPromise = new Promise(function (resolve, reject) {
+        yelpSearch(resolve, req.body.latitude, req.body.longitude);
+    });
+    var userDataPromise = new Promise(function (resolve, reject) {
+        userDB.searchForUser2(resolve, reject, req.session.passport.user.id);
+    });
+    
+    Promise.all([searchPromise, userDataPromise]).then(function(values) {
+       /* for (var business in values[0].businesses) {
+            if (values[1].indexOf(values[0].businesses[business].name) >= 0) {
+                values[0].businesses[business]["attending"] = true;
+            } else {
+                values[0].businesses[business]["attending"] = false;
+            }
+        }*/
+        
         res.setHeader('Content-Type', 'application/json');
         res.status(200);
-        //console.log(data);
-        res.send(data);
+        console.log(values[0]);
+        res.send(values[0]);
         res.end();
     });
 });
 
-function yelpSearch(lat, lon) {
+router.post("/attendance", jsonParser, function (req, res) {
+    userDB.updateUser(req.session.passport.user.id, req.body.pubName).then(function (data) {
+        
+    res.status(200);
+    res.send(JSON.stringify({added: data}));
+    res.end();
+    });
+})
+
+function yelpSearch(resolve, lat, lon) {
     var yelp = new Yelp({
         consumer_key: process.env.YELP_KEY,
         consumer_secret: process.env.YELP_SECRET,
@@ -37,12 +59,11 @@ function yelpSearch(lat, lon) {
         token_secret: process.env.YELP_TOKEN_SECRET,
     });
     
-    return new Promise(function (resolve, reject) {
         yelp.search({ term: "pub", ll: lat + "," + lon}).then(function (data) {
+            console.log("Search Completed");
             resolve(data);
         }).catch(function (err) {
             console.log(err);
-        });
     });
 }
 
